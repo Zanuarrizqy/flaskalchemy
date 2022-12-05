@@ -13,7 +13,7 @@ from flask_dance.contrib.github import github
 
 from apps import db, login_manager
 from apps.authentication import blueprint
-from apps.authentication.forms import LoginForm, CreateAccountForm
+from apps.authentication.forms import LoginForm, CreateAccountForm, UpdateAccountForm
 from apps.authentication.models import Users
 
 from apps.authentication.util import verify_pass
@@ -112,6 +112,41 @@ def register():
     else:
         return render_template('accounts/register.html', form=create_account_form)
 
+
+@blueprint.route('/update/<string:id>', methods=['GET', 'POST'] )
+def update(id=None):
+
+    if request.method == 'POST':
+        if UpdateAccountForm.validate_on_submit():
+            username = request.form['username']
+            email = request.form['email']
+            password = request.form['password']
+
+            Users.username = username
+            Users.email = email
+            Users.password = password
+
+            db.session.update(Users)
+            db.session.commit()
+
+        return redirect(url_for('authentication_blueprint.user_tbl'))
+    
+    return render_template('accounts/update.html', form=UpdateAccountForm)
+
+
+@blueprint.route('/user_tbl', methods=['GET'])
+def usertbl():
+   if request.method == "GET":
+         return render_template("home/user_tbl.html", query=Users.query.all())
+
+
+@blueprint.route('/delete/<string:id>', methods=['GET', 'POST'])
+def delete():
+        user = Users(**request.form)
+        db.session.delete(user)
+        db.session.commit()
+        
+        return redirect('authentication_blueprint.user_tbl')
 
 @blueprint.route('/logout')
 def logout():

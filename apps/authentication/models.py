@@ -62,6 +62,17 @@ class Users(db.Model, UserMixin):
             db.session.close()
             error = str(e.__dict__['orig'])
             raise InvalidUsage(error, 422)
+
+    def update_from_db(self) -> None:
+        try:
+            db.session.update(self)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            db.session.close()
+            error = str(e.__dict__['orig'])
+            raise InvalidUsage(error, 422)
+        return
     
     def delete_from_db(self) -> None:
         try:
