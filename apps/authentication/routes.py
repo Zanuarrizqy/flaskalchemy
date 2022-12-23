@@ -32,7 +32,7 @@ def index():
         response = Response(resp.content, resp.status_code, headers)
         return response
     elif request.method=="POST":
-        resp = requests.post(f"{SITE_NAME}",data=request.data)
+        resp = requests.post(f"{SITE_NAME}",data=request.form)
         excluded_headers = ["content-encoding", "content-length", "transfer-encoding", "connection"]
         headers = [(name, value) for (name, value) in resp.raw.headers.items() if name.lower() not in excluded_headers]
         response = Response(resp.content, resp.status_code, headers)
@@ -49,10 +49,10 @@ def submit(path): #error 'did not return a valid response'
         response = Response(resp.content, resp.status_code, headers)
         return response
     elif request.method=="POST":
-        resp = requests.post(f"{SITE_NAME}{path}",data=request.form)
+        resp = requests.post(f"{SITE_NAME}{path}",data=request.data)
         excluded_headers = ["content-length"]
         headers = [(name, value) for (name, value) in resp.raw.headers.items() if name.lower()]
-        response = Response(resp., resp.status_code, headers)
+        response = Response(resp.content, resp.status_code, headers)
         return response
     elif request.method =="HEAD":
         resp = requests.head(f"{SITE_NAME}{path}")
@@ -61,12 +61,11 @@ def submit(path): #error 'did not return a valid response'
         response = Response(status=resp.status_code, headers=headers)
         return response
     elif request.method=="PUT":
-        resp = requests.put(f"{SITE_NAME}{path}",data=request.form)
+        resp = requests.put(f"{SITE_NAME}",data=request.data)
         excluded_headers = ["content-length"]
         headers = [(name, value) for (name, value) in resp.raw.headers.items() if name.lower()]
-        response = Response(resp.path, resp.content, headers=headers, status=resp.status_code)
-        print(response,resp.content, request.form)
-        print(headers)
+        response = Response(resp.content, headers=headers, status=resp.status_code)
+        print (resp.content)
         return response
 
 
