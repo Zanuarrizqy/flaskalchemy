@@ -44,8 +44,16 @@
                                                 <td>{{Users["id"]}}</td>
                                                 <td>{{Users["username"]}}</td>
                                                 <td>{{Users["email"]}}</td>
-                                                <td><a href="{{url_for('authentication_blueprint.update', id=Users['id'])}}" class="btn btn-primary">Update</a></td>
-                                                <td><a href="{{url_for('authentication_blueprint.delete', id=Users['id'])}}" class="btn btn-danger">Delete</a></td>
+                                                <td><form action="/update/{{ Users.id }}" method="get">
+                                                    
+                                                    <button type="submit" class="btn btn-primary">Update</button>
+                                                </form>
+                                                    </td>
+                                                <td>
+                                                    <form action="/delete/{{ Users.id }}" method="post">
+                                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                                    </form>
+                                                  </td>                                                  
                                             </tr>
                                             {% endfor %}
                                         </tbody>

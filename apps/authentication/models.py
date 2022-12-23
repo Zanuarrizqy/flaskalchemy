@@ -51,7 +51,7 @@ class Users(db.Model, UserMixin):
     @classmethod
     def find_by_id(cls, _id: int) -> "Users":
         return cls.query.filter_by(id=_id).first()
-   
+
     def save(self) -> None:
         try:
             db.session.add(self)
@@ -63,17 +63,6 @@ class Users(db.Model, UserMixin):
             error = str(e.__dict__['orig'])
             raise InvalidUsage(error, 422)
 
-    def update_from_db(self) -> None:
-        try:
-            db.session.update(self)
-            db.session.commit()
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            db.session.close()
-            error = str(e.__dict__['orig'])
-            raise InvalidUsage(error, 422)
-        return
-    
     def delete_from_db(self) -> None:
         try:
             db.session.delete(self)

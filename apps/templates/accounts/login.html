@@ -21,7 +21,7 @@
                         {% if msg %}
                             <span class="text-danger">{{ msg | safe }}</span>
                         {% else %}
-                            Add your credentials
+                            Masukkan Username dan Password
                         {% endif %} 
                     </span>
 
@@ -44,7 +44,7 @@
 
                     </form>
 
-                    <p class="mb-0 text-muted">Don’t have an account? <a href="{{ url_for('authentication_blueprint.register') }}" >Sign UP</a></p>
+                    <p class="mb-0 text-muted">Belum Punya Akun? <a href="{{ url_for('authentication_blueprint.register') }}" >Buat Akun</a></p>
                     
                     {% if config.SOCIAL_AUTH_GITHUB %}
                         <div class="mx-2">

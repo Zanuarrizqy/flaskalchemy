@@ -3,14 +3,15 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
-from flask import render_template, redirect, request, url_for
+from flask import render_template, redirect, request, url_for, Response
 from flask_login import (
     current_user,
     login_user,
     logout_user
 )
 from flask_dance.contrib.github import github
-
+import bcrypt
+import requests
 from apps import db, login_manager
 from apps.authentication import blueprint
 from apps.authentication.forms import LoginForm, CreateAccountForm, UpdateAccountForm
@@ -18,9 +19,59 @@ from apps.authentication.models import Users
 
 from apps.authentication.util import verify_pass
 
-@blueprint.route('/')
-def route_default():
-    return redirect(url_for('authentication_blueprint.login'))
+
+SITE_NAME = "http://localhost:5000/"
+
+@blueprint.route("/",methods=['GET','POST', "HEAD"])
+def index():
+    global SITE_NAME
+    if request.method=="GET":
+        resp = requests.get(f"{SITE_NAME}")
+        excluded_headers = ["content-encoding", "content-length", "transfer-encoding", "connection"]
+        headers = [(name, value) for (name, value) in  resp.raw.headers.items() if name.lower() not in excluded_headers]
+        response = Response(resp.content, resp.status_code, headers)
+        return response
+    elif request.method=="POST":
+        resp = requests.post(f"{SITE_NAME}",data=request.data)
+        excluded_headers = ["content-encoding", "content-length", "transfer-encoding", "connection"]
+        headers = [(name, value) for (name, value) in resp.raw.headers.items() if name.lower() not in excluded_headers]
+        response = Response(resp.content, resp.status_code, headers)
+        return response
+
+
+@blueprint.route("/<path:path>",methods=["GET","POST","HEAD","PUT"])
+def submit(path): #error 'did not return a valid response'
+    global SITE_NAME
+    if request.method=="GET":
+        resp = requests.get(f"{SITE_NAME}{path}")
+        excluded_headers = ["content-encoding", "content-length", "transfer-encoding", "connection"]
+        headers = [(name, value) for (name, value) in  resp.raw.headers.items() if name.lower()]
+        response = Response(resp.content, resp.status_code, headers)
+        return response
+    elif request.method=="POST":
+        resp = requests.post(f"{SITE_NAME}{path}",data=request.form)
+        excluded_headers = ["content-length"]
+        headers = [(name, value) for (name, value) in resp.raw.headers.items() if name.lower()]
+        response = Response(resp., resp.status_code, headers)
+        return response
+    elif request.method =="HEAD":
+        resp = requests.head(f"{SITE_NAME}{path}")
+        excluded_headers = ["content-encoding", "content-length", "transfer-encoding", "connection"]
+        headers = [(name, value) for (name, value) in resp.raw.headers.items() if name.lower()]
+        response = Response(status=resp.status_code, headers=headers)
+        return response
+    elif request.method=="PUT":
+        resp = requests.put(f"{SITE_NAME}{path}",data=request.form)
+        excluded_headers = ["content-length"]
+        headers = [(name, value) for (name, value) in resp.raw.headers.items() if name.lower()]
+        response = Response(resp.path, resp.content, headers=headers, status=resp.status_code)
+        print(response,resp.content, request.form)
+        print(headers)
+        return response
+
+
+
+
 
 # Login & Registration
 
@@ -113,45 +164,39 @@ def register():
         return render_template('accounts/register.html', form=create_account_form)
 
 
-@blueprint.route('/update/<string:id>', methods=['GET', 'POST'] )
-def update(id=None):
-
-    if request.method == 'POST':
-        if UpdateAccountForm.validate_on_submit():
-            username = request.form['username']
-            email = request.form['email']
-            password = request.form['password']
-
-            Users.username = username
-            Users.email = email
-            Users.password = password
-
-            db.session.update(Users)
-            db.session.commit()
-
-        return redirect(url_for('authentication_blueprint.user_tbl'))
+@blueprint.route('/update/<int:id>', methods=['GET', 'POST'])
+def update(id):
+    if request.method == 'GET':
+        user = Users.query.get(id)
+        return render_template ('accounts/update.html', user=user)
+    if request.method =='POST':
+        user = Users.query.get(id)
+        user.username = request.form['username']
+        user.email = request.form['email']
+        db.session.commit()
+        return redirect(url_for('authentication_blueprint.usertbl'))
     
-    return render_template('accounts/update.html', form=UpdateAccountForm)
 
-
-@blueprint.route('/user_tbl', methods=['GET'])
+@blueprint.route('/usertbl', methods=['GET'])
 def usertbl():
    if request.method == "GET":
          return render_template("home/user_tbl.html", query=Users.query.all())
 
 
-@blueprint.route('/delete/<string:id>', methods=['GET', 'POST'])
-def delete():
-        user = Users(**request.form)
+@blueprint.route('/delete/<int:id>', methods=['POST'])
+def delete(id):
+    if request.method =="POST":
+        user = Users.query.get(id)
         db.session.delete(user)
         db.session.commit()
-        
-        return redirect('authentication_blueprint.user_tbl')
+        return redirect(url_for('authentication_blueprint.usertbl', user=user))
 
 @blueprint.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('authentication_blueprint.login')) 
+    return redirect(url_for('authentication_blueprint.login'))
+
+
 
 # Errors
 
