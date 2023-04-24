@@ -3,7 +3,7 @@ FROM python:3.9
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-ENV FLASK_APP run.py
+ENV FLASK_APP run.py --host 0.0.0.0
 ENV DEBUG True
 
 COPY requirements.txt .
