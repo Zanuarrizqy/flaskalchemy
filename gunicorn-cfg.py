@@ -3,7 +3,7 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
-bind = '0.0.0.0'
+bind = '127.0.0.1'
 workers = 1
 accesslog = '-'
 loglevel = 'debug'
